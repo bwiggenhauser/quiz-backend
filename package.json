@@ -1,0 +1,19 @@
+{
+  "name": "quiz-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "quiz-backend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bwiggenhauser/quiz-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bwiggenhauser/quiz-backend/issues"
+  },
+  "homepage": "https://github.com/bwiggenhauser/quiz-backend#readme"
+}
