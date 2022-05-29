@@ -13,8 +13,12 @@ const io = socketIo(server, {
 });
 
 io.on("connection", (socket) => {
-    io.emit("test", "test")
-})
-
+	socket.on("join-lobby", (lobby) => {
+		socket.join(lobby);
+		socket.emit("lobby-info", { lobby_name: "test" });
+		console.log("User joined lobby " + lobby);
+	});
+	io.emit("test", "test");
+});
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
