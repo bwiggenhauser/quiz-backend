@@ -13,12 +13,23 @@ const io = socketIo(server, {
 });
 
 io.on("connection", (socket) => {
-	socket.on("join-lobby", (lobby) => {
-		socket.join(lobby);
-		socket.emit("lobby-info", { lobby_name: "test" });
-		console.log("User joined lobby " + lobby);
+	socket.emit("your-name", socket.id);
+
+	socket.on("change-client-name", (newSocketID) => {
+		const oldName = socket.id;
+		socket.id = newSocketID;
+		socket.emit("your-name", socket.id);
+		console.log(`User ${oldName} has been renamed to ${newSocketID}`);
 	});
-	io.emit("test", "test");
+
+	socket.on("join-lobby", async (lobby) => {
+		socket.join(lobby);
+		socket.emit("your-lobby", { lobby_name: lobby });
+		console.log(`User ${socket.id} joined lobby ${lobby}`);
+
+		const sockets = await io.in(lobby).fetchSockets();
+		console.log(sockets);
+	});
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
