@@ -7,6 +7,7 @@ const app = express()
 const server = http.createServer(app)
 
 const roomHelper = require("./helpers/getAllRooms")
+const gameHelper = require("./helpers/createGame")
 
 const io = socketIo(server, {
 	cors: {
@@ -15,23 +16,12 @@ const io = socketIo(server, {
 })
 
 let players = {}
+let games = {}
 
 function updatePlayerName(id, newName) {
 	const oldName = players[id]
 	players[id] = newName
 	console.log(`Updated playername of socket ${id}: ${oldName} --> ${newName}`)
-}
-
-async function sendLobbyMembers() {
-	const rooms = roomHelper.getAllRooms(io)
-	console.log("Rooms: " + rooms)
-	for (const room of rooms) {
-		const playerList = Array.from(
-			Object.fromEntries(io.sockets.adapter.rooms)[room]
-		)
-		console.log("Playerlist in room '" + room + "' : " + playerList)
-		io.to(room).emit("lobby-members", playerList)
-	}
 }
 
 async function getRoomMembers(room) {
@@ -65,6 +55,12 @@ io.on("connection", (socket) => {
 		console.log(`${players[socket.id]} joined room ${room}`)
 		socket.emit("your-room-name", room)
 		io.in(room).emit("your-room-members", await getRoomMembers(room))
+	})
+
+	socket.on("start-game", async (room) => {
+		games[room] = gameHelper.createGame(await getRoomMembers(room), 25)
+		io.in(room).emit("your-game-info", games[room])
+		io.in(room).emit("your-game-started")
 	})
 
 	socket.on("disconnecting", async () => {
