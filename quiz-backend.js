@@ -31,9 +31,7 @@ function getIDfromPlayerName(name) {
 async function getRoomMembers(room) {
 	let playerIDsList = []
 	try {
-		playerIDsList = Array.from(
-			Object.fromEntries(io.sockets.adapter.rooms)[room]
-		)
+		playerIDsList = Array.from(Object.fromEntries(io.sockets.adapter.rooms)[room])
 	} catch (error) {
 		console.log("No members found in room " + room)
 		return []
@@ -69,13 +67,13 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("my-answer", (data) => {
+		if (games[data.room]["player_answers"][players[socket.id]] !== undefined) {
+			return
+		}
 		games[data.room]["player_answers"][players[socket.id]] = data.answer
 		const finishedPlayers = Object.keys(games[data.room]["player_answers"])
 		for (let fp of finishedPlayers) {
-			io.to(getIDfromPlayerName(fp)).emit(
-				"room-answers",
-				games[data.room]
-			)
+			io.to(getIDfromPlayerName(fp)).emit("room-answers", games[data.room])
 		}
 	})
 
