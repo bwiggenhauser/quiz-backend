@@ -24,6 +24,10 @@ function updatePlayerName(id, newName) {
 	console.log(`Updated playername of socket ${id}: ${oldName} --> ${newName}`)
 }
 
+function getIDfromPlayerName(name) {
+	return Object.keys(players).find((key) => players[key] === name)
+}
+
 async function getRoomMembers(room) {
 	let playerIDsList = []
 	try {
@@ -59,8 +63,20 @@ io.on("connection", (socket) => {
 
 	socket.on("start-game", async (room) => {
 		games[room] = gameHelper.createGame(await getRoomMembers(room), 25)
-		io.in(room).emit("your-game-info", games[room])
-		io.in(room).emit("your-game-started")
+		await io.in(room).emit("your-game-info", games[room])
+		await io.in(room).emit("your-game-started")
+		console.log(`Started game in room ${room}`)
+	})
+
+	socket.on("my-answer", (data) => {
+		games[data.room]["player_answers"][players[socket.id]] = data.answer
+		const finishedPlayers = Object.keys(games[data.room]["player_answers"])
+		for (let fp of finishedPlayers) {
+			io.to(getIDfromPlayerName(fp)).emit(
+				"room-answers",
+				games[data.room]
+			)
+		}
 	})
 
 	socket.on("disconnecting", async () => {
