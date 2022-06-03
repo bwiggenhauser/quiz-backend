@@ -2,6 +2,7 @@ function createGame(players, maxRounds) {
 	let game = {
 		all_questions: [],
 		players: [],
+		player_answers: {},
 		round_info: {
 			current: 0,
 			total: maxRounds,
