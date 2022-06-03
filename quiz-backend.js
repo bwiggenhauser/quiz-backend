@@ -8,6 +8,7 @@ const server = http.createServer(app)
 
 const roomHelper = require("./helpers/getAllRooms")
 const gameHelper = require("./helpers/createGame")
+const evaluate = require("./helpers/evaluateRound")
 
 const io = socketIo(server, {
 	cors: {
@@ -75,6 +76,20 @@ io.on("connection", (socket) => {
 		for (let fp of finishedPlayers) {
 			io.to(getIDfromPlayerName(fp)).emit("room-answers", games[data.room])
 		}
+	})
+
+	socket.on("next-question", (room) => {
+		// EVALUATE GIVEN ANSWERS
+		games[room] = evaluate.evaulateRound(games[room])
+
+		// UPDATE CURRENT ROUND INDEX
+		games[room].round_info.current += 1
+
+		// REMOVE PLAYER ANSWERS
+		games[room].player_answers = {}
+
+		// UPDATE GAME DATA FOR PLAYERS
+		io.in(room).emit("your-game-info", games[room])
 	})
 
 	socket.on("disconnecting", async () => {
