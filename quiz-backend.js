@@ -34,7 +34,8 @@ async function getRoomMembers(room) {
 	try {
 		playerIDsList = Array.from(Object.fromEntries(io.sockets.adapter.rooms)[room])
 	} catch (error) {
-		console.log("No members found in room " + room)
+		console.log(`No members found in room ${room}, deleting game if exists ...`)
+		delete games[room]
 		return []
 	}
 	let namesList = []
