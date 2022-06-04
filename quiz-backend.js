@@ -58,14 +58,13 @@ io.on("connection", (socket) => {
 	socket.on("join-room", async (room) => {
 		await socket.join(room)
 		console.log(`${players[socket.id]} joined room ${room}`)
-		const rooms = Array.from(socketio.sockets.adapter.rooms)
-		socket.emit("info", rooms)
 		socket.emit("your-room-name", room)
 		io.in(room).emit("your-room-members", await getRoomMembers(room))
 	})
 
 	socket.on("start-game", async (room) => {
 		games[room] = gameHelper.createGame(await getRoomMembers(room), 2)
+		socket.emit("info", games)
 		await io.in(room).emit("your-game-info", games[room])
 		await io.in(room).emit("your-game-started")
 		console.log(`Started game in room ${room}`)
