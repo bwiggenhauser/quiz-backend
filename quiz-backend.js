@@ -62,7 +62,7 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("start-game", async (room) => {
-		games[room] = gameHelper.createGame(await getRoomMembers(room), 25)
+		games[room] = gameHelper.createGame(await getRoomMembers(room), 2)
 		await io.in(room).emit("your-game-info", games[room])
 		await io.in(room).emit("your-game-started")
 		console.log(`Started game in room ${room}`)
@@ -82,6 +82,13 @@ io.on("connection", (socket) => {
 	socket.on("next-question", (room) => {
 		// EVALUATE GIVEN ANSWERS
 		games[room] = evaluate.evaulateRound(games[room])
+
+		// IF GAME FINISHED -> SEND PLAYER SCORES
+		if (games[room].round_info.current === games[room].round_info.total - 1) {
+			console.log(`Game in room ${room} has been finished ...`)
+			io.in(room).emit("game-finished", games[room].players)
+			return
+		}
 
 		// UPDATE CURRENT ROUND INDEX
 		games[room].round_info.current += 1
