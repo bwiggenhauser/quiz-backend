@@ -35,7 +35,7 @@ async function getRoomMembers(room) {
 		playerIDsList = Array.from(Object.fromEntries(io.sockets.adapter.rooms)[room])
 	} catch (error) {
 		console.log(`No members found in room ${room}, deleting game if exists ...`)
-		delete games[room]
+		//delete games[room]
 		return []
 	}
 	let namesList = []
@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("start-game", async (room) => {
-		games[room] = gameHelper.createGame(await getRoomMembers(room), 2)
+		games[room] = gameHelper.createGame(await getRoomMembers(room), 4)
 		socket.emit("info", games)
 		await io.in(room).emit("your-game-info", games[room])
 		await io.in(room).emit("your-game-started")
