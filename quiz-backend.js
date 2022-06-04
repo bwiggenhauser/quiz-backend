@@ -52,6 +52,7 @@ io.on("connection", (socket) => {
 	socket.on("change-client-name", async (newClientName) => {
 		updatePlayerName(socket.id, newClientName)
 		socket.emit("your-name", players[socket.id])
+		socket.emit("info", { players: players, games: games })
 	})
 
 	socket.on("join-room", async (room) => {
