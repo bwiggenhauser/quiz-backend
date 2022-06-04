@@ -58,6 +58,8 @@ io.on("connection", (socket) => {
 	socket.on("join-room", async (room) => {
 		await socket.join(room)
 		console.log(`${players[socket.id]} joined room ${room}`)
+		const rooms = Array.from(socketio.sockets.adapter.rooms)
+		socket.emit("info", rooms)
 		socket.emit("your-room-name", room)
 		io.in(room).emit("your-room-members", await getRoomMembers(room))
 	})
