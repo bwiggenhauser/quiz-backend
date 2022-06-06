@@ -7,7 +7,7 @@ function getAllRooms(socketio) {
 
 function sendRoomMembersToAllRooms(roomlist, io, playerlist) {
 	console.log(roomlist)
-	const connectedIDs = Object.keys(Object.fromEntries(io.sockets.adapter.sids))
+	//const connectedIDs = Object.keys(Object.fromEntries(io.sockets.adapter.sids))
 	for (const room of roomlist) {
 		const idsInRoom = Array.from(Object.fromEntries(io.sockets.adapter.rooms)[room])
 		let namesInRoom = []
