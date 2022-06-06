@@ -61,8 +61,8 @@ io.on("connection", (socket) => {
 		players = playerController.renamePlayer(socket.id, newClientName, players, socket, io)
 	})
 
-	socket.on("join-room", async (room) => {
-		await socket.join(room)
+	socket.on("join-room", (room) => {
+		socket.join(room)
 		console.log(`${players[socket.id]} joined room ${room}`)
 		const allRooms = getAllRooms.getAllRooms(io)
 		getAllRooms.sendRoomMembersToAllRooms(allRooms, io, players)
