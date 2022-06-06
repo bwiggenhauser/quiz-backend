@@ -1,19 +1,19 @@
 function evaulateRound(gameObj) {
-	const currentQuestionIndex = gameObj.round_info.current
-	const correctAnswer = gameObj.all_questions[currentQuestionIndex].correct[0]
-	for (let p of gameObj.players) {
-		const playerAnswer = gameObj.player_answers[p.name]
+	console.log(gameObj)
+	const correctAnswer = gameObj.current_question.correct
+	for (let playerName of Object.keys(gameObj.player_answers)) {
+		const playerAnswer = gameObj.player_answers[playerName]
 		if (playerAnswer === correctAnswer) {
-			gameObj = addScoreToPlayer(p.name, 1, gameObj)
+			gameObj = addScoreToPlayer(playerName, 1, gameObj)
 		}
 	}
 	return gameObj
 }
 
 function addScoreToPlayer(playerName, scoreToAdd, gameObj) {
-	for (let i = 0; i < gameObj.players.length; i++) {
-		if (gameObj.players[i].name === playerName) {
-			gameObj.players[i].score += scoreToAdd
+	for (let i = 0; i < gameObj.scoreboard.length; i++) {
+		if (gameObj.scoreboard[i].name === playerName) {
+			gameObj.scoreboard[i].score += scoreToAdd
 		}
 	}
 	return gameObj

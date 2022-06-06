@@ -6,9 +6,10 @@ const port = process.env.PORT || 4005
 const app = express()
 const server = http.createServer(app)
 
-const roomHelper = require("./helpers/getAllRooms")
-const gameHelper = require("./helpers/createGame")
+const createNewGame = require("./helpers/createNewGame")
+const playerController = require("./helpers/playersController")
 const evaluate = require("./helpers/evaluateRound")
+const getAllRooms = require("./helpers/getAllRooms")
 
 const io = socketIo(server, {
 	cors: {
@@ -19,14 +20,15 @@ const io = socketIo(server, {
 let players = {}
 let games = {}
 
-function updatePlayerName(id, newName) {
-	const oldName = players[id]
-	players[id] = newName
-	console.log(`Updated playername of socket ${id}: ${oldName} --> ${newName}`)
-}
-
 function getIDfromPlayerName(name) {
-	return Object.keys(players).find((key) => players[key] === name)
+	console.log(name)
+	console.log(players)
+	const keys = Object.keys(players)
+	for (let i = 0; i < keys.length; i++) {
+		if (players[keys[i]].name === name) {
+			return keys[i]
+		}
+	}
 }
 
 async function getRoomMembers(room) {
@@ -46,38 +48,39 @@ async function getRoomMembers(room) {
 }
 
 io.on("connection", (socket) => {
-	updatePlayerName(socket.id, socket.id)
-	socket.emit("your-name", socket.id)
+	players = playerController.addNewPlayer(socket.id, players, socket, io)
+	socket.emit("your-name-changed", socket.id)
 
 	socket.on("change-client-name", async (newClientName) => {
-		updatePlayerName(socket.id, newClientName)
-		socket.emit("your-name", players[socket.id])
-		socket.emit("info", { players: players, games: games })
+		players = playerController.renamePlayer(socket.id, newClientName, players, socket, io)
 	})
 
 	socket.on("join-room", async (room) => {
 		await socket.join(room)
 		console.log(`${players[socket.id]} joined room ${room}`)
+		const allRooms = getAllRooms.getAllRooms(io)
+		getAllRooms.sendRoomMembersToAllRooms(allRooms, io, players)
 		socket.emit("your-room-name", room)
-		io.in(room).emit("your-room-members", await getRoomMembers(room))
 	})
 
 	socket.on("start-game", async (room) => {
-		games[room] = gameHelper.createGame(await getRoomMembers(room), 4)
-		socket.emit("info", games)
-		await io.in(room).emit("your-game-info", games[room])
+		games[room] = createNewGame.createNewGame(room, 5, await getRoomMembers(room), socket, io)
 		await io.in(room).emit("your-game-started")
+		await io.in(room).emit("game-data", games[room])
 		console.log(`Started game in room ${room}`)
 	})
 
 	socket.on("my-answer", (data) => {
-		if (games[data.room]["player_answers"][players[socket.id]] !== undefined) {
+		if (games[data.room]["player_answers"][players[socket.id].name] !== undefined) {
 			return
 		}
-		games[data.room]["player_answers"][players[socket.id]] = data.answer
+		games[data.room]["player_answers"][players[socket.id].name] = data.answer
+		console.log(games)
 		const finishedPlayers = Object.keys(games[data.room]["player_answers"])
 		for (let fp of finishedPlayers) {
-			io.to(getIDfromPlayerName(fp)).emit("room-answers", games[data.room])
+			console.log(getIDfromPlayerName(fp))
+			let socketID = getIDfromPlayerName(fp)
+			io.to(socketID).emit("room-answers", games[data.room])
 		}
 	})
 
@@ -86,28 +89,31 @@ io.on("connection", (socket) => {
 		games[room] = evaluate.evaulateRound(games[room])
 
 		// IF GAME FINISHED -> SEND PLAYER SCORES
-		if (games[room].round_info.current === games[room].round_info.total - 1) {
+		if (games[room].current_round === games[room].total_rounds) {
 			console.log(`Game in room ${room} has been finished ...`)
-			io.in(room).emit("game-finished", games[room].players)
+			io.in(room).emit("game-finished", games[room])
 			return
 		}
 
 		// UPDATE CURRENT ROUND INDEX
-		games[room].round_info.current += 1
+		games[room].current_round += 1
 
 		// REMOVE PLAYER ANSWERS
 		games[room].player_answers = {}
 
 		// UPDATE GAME DATA FOR PLAYERS
-		io.in(room).emit("your-game-info", games[room])
+		io.in(room).emit("game-data", games[room])
 	})
 
 	socket.on("disconnecting", async () => {
-		const allRooms = socket.rooms
-		for (room of allRooms) {
+		const allClientRooms = socket.rooms
+		for (room of allClientRooms) {
 			await socket.leave(room)
-			io.in(room).emit("your-room-members", await getRoomMembers(room))
 		}
+
+		const allRooms = getAllRooms.getAllRooms(io)
+		getAllRooms.sendRoomMembersToAllRooms(allRooms, io, players)
+
 		delete players[socket.id]
 		console.log(`Removed socket ${socket.id} from players list`)
 	})
