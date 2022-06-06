@@ -55,7 +55,7 @@ async function getRoomMembers(room) {
 
 io.on("connection", (socket) => {
 	players = playerController.addNewPlayer(socket.id, players, socket, io)
-	socket.emit("your-name-changed", socket.id)
+	//socket.emit("your-name-changed", socket.id)
 
 	socket.on("change-client-name", async (newClientName) => {
 		players = playerController.renamePlayer(socket.id, newClientName, players, socket, io)
