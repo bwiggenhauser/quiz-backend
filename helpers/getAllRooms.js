@@ -9,6 +9,10 @@ function sendRoomMembersToAllRooms(roomlist, io, playerlist) {
 	console.log(roomlist)
 	//const connectedIDs = Object.keys(Object.fromEntries(io.sockets.adapter.sids))
 	for (const room of roomlist) {
+		let testRooms = io.sockets.adapter.rooms
+		let testRoom = Object.fromEntries(testRooms)
+		testRoom = testRoom[room]
+		console.log(testRoom)
 		const idsInRoom = Array.from(Object.fromEntries(io.sockets.adapter.rooms)[room])
 		let namesInRoom = []
 		for (const socketID of idsInRoom) {
