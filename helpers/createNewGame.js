@@ -1,13 +1,17 @@
+const questionHelper = require("../questions/questionHelper")
+
 function sendUpdatedGameData(io, gameData, room) {
+	console.log(gameData)
 	io.in(room).emit("game-data", gameData)
 }
 
-function createNewGame(roomName, maxRounds, playersInGame, socket, io) {
+async function createNewGame(roomName, maxRounds, playersInGame, socket, io) {
+	let question = await questionHelper.getNewQuestion()
 	let newGame = {
 		total_rounds: maxRounds,
 		current_round: 1,
 		scoreboard: [],
-		current_question: getNewQuestion(),
+		current_question: question,
 		player_answers: {},
 	}
 	for (const p of playersInGame) {
@@ -34,7 +38,7 @@ function nextRound(id, games, socket, io) {
 	)
 
 	//UPDATE QUESTION
-	games = games[id].current_question = getNewQuestion()
+	games[id].current_question = questionHelper.getNewQuestion()
 
 	// UPDATE CURRENT COUNTER
 	games = games[id].current_round += 1

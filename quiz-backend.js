@@ -10,6 +10,7 @@ const createNewGame = require("./helpers/createNewGame")
 const playerController = require("./helpers/playersController")
 const evaluate = require("./helpers/evaluateRound")
 const getAllRooms = require("./helpers/getAllRooms")
+const questionHelper = require("./questions/questionHelper")
 
 const io = socketIo(server, {
 	cors: {
@@ -62,13 +63,19 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("start-game", async (room) => {
-		games[room] = createNewGame.createNewGame(room, 5, await getRoomMembers(room), socket, io)
-		await io.in(room).emit("your-game-started")
+		io.in(room).emit("your-game-started")
+		games[room] = await createNewGame.createNewGame(
+			room,
+			5,
+			await getRoomMembers(room),
+			socket,
+			io
+		)
 		await io.in(room).emit("game-data", games[room])
 		console.log(`Started game in room ${room}`)
 	})
 
-	socket.on("my-answer", (data) => {
+	socket.on("my-answer", async (data) => {
 		if (games[data.room]["player_answers"][players[socket.id].name] !== undefined) {
 			return
 		}
@@ -82,7 +89,7 @@ io.on("connection", (socket) => {
 		}
 	})
 
-	socket.on("next-question", (room) => {
+	socket.on("next-question", async (room) => {
 		// EVALUATE GIVEN ANSWERS
 		games[room] = evaluate.evaulateRound(games[room])
 
@@ -99,6 +106,10 @@ io.on("connection", (socket) => {
 
 		// REMOVE PLAYER ANSWERS
 		games[room].player_answers = {}
+
+		// GET NEW QUESTION
+		games[room].current_question = {}
+		games[room].current_question = await questionHelper.getNewQuestion()
 
 		// UPDATE GAME DATA FOR PLAYERS
 		io.in(room).emit("game-data", games[room])
