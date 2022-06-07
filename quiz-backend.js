@@ -20,15 +20,9 @@ const io = socketIo(server, {
 let players = {}
 let games = {}
 
-app.get("/games", (req, res) => {
-	res.send(games)
-})
-
-app.get("/players", (req, res) => {
-	res.send(players)
-})
-
 function getIDfromPlayerName(name) {
+	console.log(name)
+	console.log(players)
 	const keys = Object.keys(players)
 	for (let i = 0; i < keys.length; i++) {
 		if (players[keys[i]].name === name) {
