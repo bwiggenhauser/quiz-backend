@@ -3,8 +3,8 @@ function addNewPlayer(name, players, socket, io) {
 		name: name,
 		rooms: [name],
 	}
-	socket.emit("your-name-changed", name)
-	//io.emit("all-players", players)
+	socket.emit("welcome", `Welcome, your name is ${name} ...`)
+	io.emit("all-players", players)
 	console.log(`New Player ${name} has been added ...`)
 	return players
 }
