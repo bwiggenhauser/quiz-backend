@@ -2,6 +2,7 @@ function addNewPlayer(name, players, socket, io) {
 	players[name] = {
 		name: name,
 		rooms: [name],
+		left_game: false,
 	}
 	socket.emit("welcome", `Welcome, your name is ${name} ...`)
 	io.emit("all-players", players)

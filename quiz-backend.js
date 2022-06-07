@@ -21,8 +21,6 @@ let players = {}
 let games = {}
 
 function getIDfromPlayerName(name) {
-	console.log(name)
-	console.log(players)
 	const keys = Object.keys(players)
 	for (let i = 0; i < keys.length; i++) {
 		if (players[keys[i]].name === name) {
@@ -92,6 +90,7 @@ io.on("connection", (socket) => {
 		if (games[room].current_round === games[room].total_rounds) {
 			console.log(`Game in room ${room} has been finished ...`)
 			io.in(room).emit("game-finished", games[room])
+			delete games[room]
 			return
 		}
 
@@ -107,9 +106,16 @@ io.on("connection", (socket) => {
 
 	socket.on("disconnecting", async () => {
 		const allClientRooms = socket.rooms
-		for (room of allClientRooms) {
+		const allGames = Object.keys(games)
+
+		/* for (room of allClientRooms) {
 			await socket.leave(room)
-		}
+            if (allGames.includes(room)) {
+                
+            }
+		} */
+
+		//games[]
 
 		const allRooms = getAllRooms.getAllRooms(io)
 		getAllRooms.sendRoomMembersToAllRooms(allRooms, io, players)
@@ -118,4 +124,20 @@ io.on("connection", (socket) => {
 		console.log(`Removed socket ${socket.id} from players list`)
 	})
 })
+
+function removePlayerFromGames(gameslist, socketID) {
+	if (gameslist === undefined) {
+		console.log("gameslist is empty")
+		return {}
+	}
+	for (const game of Object.keys(gameslist)) {
+		for (let i = 0; i < gameslist[game].scoreboard.length; i++) {
+			if (gameslist[game].scoreboard[i].name === players[socketID]) {
+				console.log("Removing")
+				gameslist[game].scoreboard.slice(i, 1)
+			}
+		}
+	}
+	return gameslist
+}
 server.listen(port, () => console.log(`Listening on port ${port}`))
