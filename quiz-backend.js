@@ -62,7 +62,10 @@ io.on("connection", (socket) => {
 		socket.emit("your-room-name", room)
 	})
 
-	socket.on("start-game", async (room) => {
+	socket.on("start-game", async (data) => {
+		let room = data.room
+		let totalRounds = data.totalRounds
+
 		io.in(room).emit("your-game-started")
 		games[room] = await createNewGame.createNewGame(
 			room,
