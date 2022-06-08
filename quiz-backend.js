@@ -62,6 +62,10 @@ io.on("connection", (socket) => {
 		socket.emit("your-room-name", room)
 	})
 
+	socket.on("change-lobby-total-rounds", (data) => {
+		io.in(data.room).emit("lobby-total-rounds", data.totalRounds)
+	})
+
 	socket.on("start-game", async (data) => {
 		let room = data.room
 		let totalRounds = data.totalRounds
