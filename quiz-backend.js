@@ -90,12 +90,14 @@ io.on("connection", (socket) => {
 			return
 		}
 		games[data.room]["player_answers"][players[socket.id].name] = data.answer
-		console.log(games)
 		const finishedPlayers = Object.keys(games[data.room]["player_answers"])
 		for (let fp of finishedPlayers) {
-			console.log(getIDfromPlayerName(fp))
 			let socketID = getIDfromPlayerName(fp)
 			io.to(socketID).emit("room-answers", games[data.room])
+		}
+
+		if (games[data.room].scoreboard.length === finishedPlayers.length) {
+			io.in(data.room).emit("show-correct-answer", games[data.room].current_question.correct)
 		}
 	})
 
