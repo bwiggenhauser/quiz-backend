@@ -1,5 +1,5 @@
 const he = require("he")
-const questionAPI = "https://opentdb.com/api.php?amount=1&category=9&type=multiple"
+const questionAPI = "https://opentdb.com/api.php?amount=1&type=multiple"
 
 async function getNewQuestion() {
 	try {
