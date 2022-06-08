@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
 		io.in(room).emit("your-game-started")
 		games[room] = await createNewGame.createNewGame(
 			room,
-			5,
+			totalRounds,
 			await getRoomMembers(room),
 			socket,
 			io
