@@ -12,7 +12,7 @@ async function getNewQuestion() {
 		for (const a of incorrect) {
 			decoded.push(he.decode(a))
 		}
-		const shuffled = incorrect.sort((a, b) => 0.5 - Math.random())
+		const shuffled = decoded.sort((a, b) => 0.5 - Math.random())
 		return {
 			question: he.decode(res.question),
 			correct: he.decode(res.correct_answer),
