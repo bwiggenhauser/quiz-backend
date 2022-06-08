@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
 		games[room] = evaluate.evaulateRound(games[room])
 
 		// IF GAME FINISHED -> SEND PLAYER SCORES
-		if (games[room].current_round === games[room].total_rounds) {
+		if (games[room].current_round.toString() === games[room].total_rounds) {
 			console.log(`Game in room ${room} has been finished ...`)
 			io.in(room).emit("game-finished", games[room])
 			delete games[room]
