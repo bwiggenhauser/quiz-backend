@@ -105,6 +105,8 @@ io.on("connection", (socket) => {
 		// SHOW LOADING SPINNER ON CLIENTS
 		io.in(room).emit("show-loading")
 
+		io.in(room).emit("next-round-starting")
+
 		// EVALUATE GIVEN ANSWERS
 		games[room] = evaluate.evaulateRound(games[room])
 
@@ -134,17 +136,17 @@ io.on("connection", (socket) => {
 		const allClientRooms = socket.rooms
 		const allGames = Object.keys(games)
 
-		/* for (room of allClientRooms) {
+		for (room of allClientRooms) {
 			await socket.leave(room)
-            if (allGames.includes(room)) {
-                
-            }
-		} */
+		}
 
-		//games[]
+		games = removePlayerFromGames(games, socket.id)
 
 		const allRooms = getAllRooms.getAllRooms(io)
 		getAllRooms.sendRoomMembersToAllRooms(allRooms, io, players)
+		for (const r of Object.keys(games)) {
+			io.in(r).emit("game-data", games[r])
+		}
 
 		delete players[socket.id]
 		console.log(`Removed socket ${socket.id} from players list`)
@@ -158,12 +160,14 @@ function removePlayerFromGames(gameslist, socketID) {
 	}
 	for (const game of Object.keys(gameslist)) {
 		for (let i = 0; i < gameslist[game].scoreboard.length; i++) {
-			if (gameslist[game].scoreboard[i].name === players[socketID]) {
-				console.log("Removing")
-				gameslist[game].scoreboard.slice(i, 1)
+			console.log(gameslist[game].scoreboard[i].name)
+			console.log(players[socketID].name)
+			if (gameslist[game].scoreboard[i].name === players[socketID].name) {
+				gameslist[game].scoreboard.splice(i, 1)
 			}
 		}
 	}
 	return gameslist
 }
+
 server.listen(port, () => console.log(`Listening on port ${port}`))
