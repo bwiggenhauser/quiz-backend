@@ -66,6 +66,9 @@ io.on("connection", (socket) => {
 		let room = data.room
 		let totalRounds = data.totalRounds
 
+		// SHOW LOADING SPINNER ON CLIENTS
+		io.in(room).emit("show-loading")
+
 		io.in(room).emit("your-game-started")
 		games[room] = await createNewGame.createNewGame(
 			room,
@@ -93,6 +96,9 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("next-question", async (room) => {
+		// SHOW LOADING SPINNER ON CLIENTS
+		io.in(room).emit("show-loading")
+
 		// EVALUATE GIVEN ANSWERS
 		games[room] = evaluate.evaulateRound(games[room])
 
