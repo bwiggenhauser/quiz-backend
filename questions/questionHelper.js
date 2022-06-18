@@ -6,6 +6,7 @@ async function getNewQuestion() {
 		let res = await fetch(questionAPI)
 		res = await res.json()
 		res = await res.results[0]
+		console.log(res)
 		let incorrect = await res.incorrect_answers
 		await incorrect.push(res.correct_answer)
 		let decoded = []
@@ -17,6 +18,8 @@ async function getNewQuestion() {
 			question: he.decode(res.question),
 			correct: he.decode(res.correct_answer),
 			answers: shuffled,
+			category: he.decode(res.category),
+			difficulty: he.decode(res.difficulty),
 		}
 	} catch (error) {
 		console.log(error)
